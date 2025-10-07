@@ -1,0 +1,84 @@
+﻿services:
+  # 🌐 Sua API (único serviço público)
+  - type: web
+    name: fcg-game-api
+    env: docker
+    dockerfilePath: ./FCG.Game.API/Dockerfile
+    dockerContext: .
+    autoDeploy: true
+    plan: free
+    ports:
+      - 5000
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: Elastic__Url
+        value: http://fcg-elasticsearch:9200
+      - key: Redis__ConnectionString
+        value: fcg-redis:6379
+      - key: EventStore__ConnectionString
+        value: esdb://fcg-eventstore:2113?tls=false
+    startCommand: >
+      dotnet FCG.Game.API.dll
+
+  # 🧠 Elasticsearch
+  - type: pserv
+    name: fcg-elasticsearch
+    env: docker
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    autoDeploy: false
+    plan: free
+    ports:
+      - 9200
+    envVars:
+      - key: discovery.type
+        value: single-node
+      - key: xpack.security.enabled
+        value: "false"
+      - key: ES_JAVA_OPTS
+        value: "-Xms512m -Xmx512m"
+
+  # 📊 Kibana
+  - type: pserv
+    name: fcg-kibana
+    env: docker
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    autoDeploy: false
+    plan: free
+    ports:
+      - 5601
+    envVars:
+      - key: ELASTICSEARCH_HOSTS
+        value: http://fcg-elasticsearch:9200
+
+  # 🗃️ EventStoreDB
+  - type: pserv
+    name: fcg-eventstore
+    env: docker
+    image: eventstore/eventstore:latest
+    autoDeploy: false
+    plan: free
+    ports:
+      - 1113
+      - 2113
+    envVars:
+      - key: EVENTSTORE_CLUSTER_SIZE
+        value: "1"
+      - key: EVENTSTORE_RUN_PROJECTIONS
+        value: All
+      - key: EVENTSTORE_START_STANDARD_PROJECTIONS
+        value: "true"
+      - key: EVENTSTORE_INSECURE
+        value: "true"
+      - key: EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP
+        value: "true"
+
+  # ⚡ Redis
+  - type: pserv
+    name: fcg-redis
+    env: docker
+    image: redis:alpine
+    autoDeploy: false
+    plan: free
+    ports:
+      - 6379
