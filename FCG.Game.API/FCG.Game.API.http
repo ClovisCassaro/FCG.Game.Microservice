@@ -1,0 +1,6 @@
+@FCG.Game.API_HostAddress = http://localhost:5284
+
+GET {{FCG.Game.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
