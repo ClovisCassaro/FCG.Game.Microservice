@@ -1,7 +1,6 @@
-﻿# Define os discos persistentes (equivalente aos volumes do Docker Compose)
+﻿# Define os discos persistentes (volumes)
 disks:
   - name: elasticsearch-storage
-    # Ajuste o tamanho conforme a necessidade, '5' GB é um bom ponto de partida.
     sizeGB: 5
     mountPath: /usr/share/elasticsearch/data # Caminho interno do contêiner
   
@@ -10,7 +9,7 @@ disks:
     mountPath: /var/lib/eventstore # Caminho interno do contêiner
 
 services:
-  # 🌐 1. Sua API (Web Service)
+  # 1. Sua API (Web Service)
   - type: web
     name: fcg-game-api
     env: docker
@@ -18,29 +17,29 @@ services:
     dockerContext: .
     autoDeploy: true
     plan: free
-    ports: # Porta pública MANTIDA
+    ports: # CORRIGIDO: Lista simples de portas para serviço 'web'
       - 5000
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
       - key: Elastic__Url
-        value: http://fcg-elasticsearch:9200 # Usa o nome interno do serviço
+        value: http://fcg-elasticsearch:9200
       - key: Redis__ConnectionString
-        value: fcg-redis:6379 # Usa o nome interno do serviço
+        value: fcg-redis:6379
       - key: EventStore__ConnectionString
-        value: esdb://fcg-eventstore:2113?tls=false # Usa o nome interno do serviço
+        value: esdb://fcg-eventstore:2113?tls=false
     startCommand: >
       dotnet FCG.Game.API.dll
 
-  # 🧠 2. Elasticsearch (Private Service com Disco Persistente)
+  # 2. Elasticsearch (Private Service com Disco Persistente)
   - type: pserv
     name: fcg-elasticsearch
     env: docker
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
     autoDeploy: false
     plan: free
-    # PORTAS REMOVIDAS (acesso interno já é garantido na 9200)
-    disks: # Adiciona o disco persistente (equivalente ao volume)
+    # PORTAS REMOVIDAS (Correto para 'pserv')
+    disks: # CORRIGIDO: Referencia o disco pelo nome
       - name: elasticsearch-storage
     envVars:
       - key: discovery.type
@@ -50,27 +49,27 @@ services:
       - key: ES_JAVA_OPTS
         value: "-Xms512m -Xmx512m"
 
-  # 📊 3. Kibana (Private Service)
+  # 3. Kibana (Private Service)
   - type: pserv
     name: fcg-kibana
     env: docker
     image: docker.elastic.co/kibana/kibana:8.11.0
     autoDeploy: false
     plan: free
-    # PORTAS REMOVIDAS (acesso interno já é garantido na 5601)
+    # PORTAS REMOVIDAS (Correto para 'pserv')
     envVars:
       - key: ELASTICSEARCH_HOSTS
-        value: http://fcg-elasticsearch:9200 # OK
+        value: http://fcg-elasticsearch:9200
 
-  # 🗃️ 4. EventStoreDB (Private Service com Disco Persistente)
+  # 4. EventStoreDB (Private Service com Disco Persistente)
   - type: pserv
     name: fcg-eventstore
     env: docker
     image: eventstore/eventstore:latest
     autoDeploy: false
     plan: free
-    # PORTAS REMOVIDAS (acesso interno já é garantido nas 1113 e 2113)
-    disks: # Adiciona o disco persistente (equivalente ao volume)
+    # PORTAS REMOVIDAS (Correto para 'pserv')
+    disks: # CORRIGIDO: Referencia o disco pelo nome
       - name: eventstore-storage
     envVars:
       - key: EVENTSTORE_CLUSTER_SIZE
@@ -84,11 +83,11 @@ services:
       - key: EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP
         value: "true"
 
-  # ⚡ 5. Redis (Private Service)
+  # 5. Redis (Private Service)
   - type: pserv
     name: fcg-redis
     env: docker
     image: redis:alpine
     autoDeploy: false
     plan: free
-    # PORTAS REMOVIDAS (acesso interno já é garantido na 6379)
+    # PORTAS REMOVIDAS (Correto para 'pserv')
