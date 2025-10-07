@@ -1,5 +1,5 @@
 ﻿services:
-  # 🌐 Sua API (único serviço público)
+  # 🌐 API principal (único serviço público)
   - type: web
     name: fcg-game-api
     env: docker
@@ -7,8 +7,7 @@
     dockerContext: .
     autoDeploy: true
     plan: free
-    ports:
-      - 5000
+    port: 5000
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
@@ -24,12 +23,10 @@
   # 🧠 Elasticsearch
   - type: pserv
     name: fcg-elasticsearch
-    env: docker
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
     autoDeploy: false
     plan: free
-    ports:
-      - 9200
+    port: 9200
     envVars:
       - key: discovery.type
         value: single-node
@@ -41,12 +38,10 @@
   # 📊 Kibana
   - type: pserv
     name: fcg-kibana
-    env: docker
     image: docker.elastic.co/kibana/kibana:8.11.0
     autoDeploy: false
     plan: free
-    ports:
-      - 5601
+    port: 5601
     envVars:
       - key: ELASTICSEARCH_HOSTS
         value: http://fcg-elasticsearch:9200
@@ -54,13 +49,10 @@
   # 🗃️ EventStoreDB
   - type: pserv
     name: fcg-eventstore
-    env: docker
     image: eventstore/eventstore:latest
     autoDeploy: false
     plan: free
-    ports:
-      - 1113
-      - 2113
+    port: 2113
     envVars:
       - key: EVENTSTORE_CLUSTER_SIZE
         value: "1"
@@ -76,9 +68,7 @@
   # ⚡ Redis
   - type: pserv
     name: fcg-redis
-    env: docker
     image: redis:alpine
     autoDeploy: false
     plan: free
-    ports:
-      - 6379
+    port: 6379
