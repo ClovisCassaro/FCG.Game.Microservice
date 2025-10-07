@@ -173,17 +173,14 @@ catch (Exception ex)
 // MIDDLEWARE PIPELINE
 // ============================================
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "FCG Games API v1");
-        c.RoutePrefix = "swagger";
-    });
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "FCG Games API v1");
+    c.RoutePrefix = "swagger";
+});
 
-    app.Logger.LogInformation("📚 Swagger disponível em: http://localhost:5002/swagger");
-}
+app.Logger.LogInformation("📚 Swagger disponível em: http://localhost:5002/swagger");
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll"); 
