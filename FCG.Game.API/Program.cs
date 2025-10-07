@@ -151,8 +151,8 @@ try
 }
 catch (Exception ex)
 {
-    app.Logger.LogError(ex, "❌ Erro ao inicializar Elasticsearch");
-    throw; // Em produção, você pode querer continuar mesmo com erro no Elastic
+    app.Logger.LogWarning(ex, "⚠️ Elasticsearch não disponível. Continuando sem indexação...");
+    // ✅ NÃO faz throw! Deixa o serviço rodar sem Elasticsearch
 }
 
 // Verificar conexão EventStore
@@ -165,8 +165,8 @@ try
 }
 catch (Exception ex)
 {
-    app.Logger.LogError(ex, "❌ Erro ao conectar com EventStore");
-    throw; // Crítico: sem EventStore não tem Event Sourcing
+    app.Logger.LogWarning(ex, "⚠️ EventStore não disponível. Event Sourcing desabilitado.");
+    // ✅ Deixa rodar sem EventStore
 }
 
 // ============================================
@@ -186,7 +186,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+app.UseCors("AllowAll"); 
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -8,16 +8,17 @@ public class ElasticSearchConfig
     public static ElasticClient CreateClient(string uri)
     {
         var settings = new ConnectionSettings(new Uri(uri))
-            .EnableDebugMode()
-            .PrettyJson()
-            .DefaultMappingFor<GameDocument>(m => m
-                .IndexName("games")
-                .IdProperty(p => p.Id)
-            )
-            .DefaultMappingFor<OrderDocument>(m => m
-                .IndexName("orders")
-                .IdProperty(p => p.Id)
+            .DefaultIndex("games")
+            .EnableApiVersioningHeader();
+
+        // Adicionar API Key se disponível
+        var apiKey = Environment.GetEnvironmentVariable("Elasticsearch__ApiKey");
+        if (!string.IsNullOrEmpty(apiKey))
+        {
+            settings = settings.ApiKeyAuthentication(
+                new Elasticsearch.Net.ApiKeyAuthenticationCredentials(apiKey)
             );
+        }
 
         return new ElasticClient(settings);
     }
