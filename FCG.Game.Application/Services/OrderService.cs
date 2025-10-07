@@ -92,13 +92,16 @@ public class OrderService
         var @event = new OrderCompletedEvent(orderId, userId, DateTime.UtcNow);
         await _eventStore.AppendEventAsync($"order-{orderId}", @event);
 
-        // Atualizar status
+        // Atualizar status no Elasticsearch sem sobrescrever os outros campos
         var updateResponse = await _elasticClient.UpdateAsync<OrderDocument>(orderId, u => u
-            .Doc(new OrderDocument
-            {
-                Status = OrderStatus.Completed.ToString(),
-                CompletedAt = DateTime.UtcNow
-            })
+            .Index("orders")
+            .Script(s => s
+                .Source("ctx._source.status = params.status; ctx._source.completedAt = params.completedAt;")
+                .Params(p => p
+                    .Add("status", OrderStatus.Completed.ToString())
+                    .Add("completedAt", DateTime.UtcNow)
+                )
+            )
         );
 
         // Atualizar estatísticas dos jogos

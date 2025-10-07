@@ -60,6 +60,14 @@ public class OrdersController : ApiBaseController
         return Ok(order);
     }
 
+    [HttpGet("claims")]
+    [AllowAnonymous] // só enquanto debug — remova depois
+    public IActionResult GetClaims()
+    {
+        return Ok(User.Claims.Select(c => new { c.Type, c.Value }));
+    }
+
+
     [HttpGet("my-orders")]
     public async Task<IActionResult> GetMyOrders([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {

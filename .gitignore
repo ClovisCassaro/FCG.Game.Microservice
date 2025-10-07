@@ -53,3 +53,4 @@ docker-compose.override.yml
 .env
 .env.local
 .env.*.local
+/FCG.Game.API/Controllers/AuthController.cs

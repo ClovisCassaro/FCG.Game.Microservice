@@ -1,8 +1,3 @@
-// ============================================
-// CAMINHO: FCG.Game.API\Controllers\ApiBaseController.cs
-// AÇÃO: CRIAR arquivo novo
-// ============================================
-
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -13,11 +8,13 @@ namespace FCG.Game.API.Controllers;
 public abstract class ApiBaseController : ControllerBase
 {
     /// <summary>
-    /// Extrai o ID do usuário do token JWT
+    /// Extrai o ID do usuário do token JWT.
+    /// CORREÇÃO: Verifica ClaimTypes.NameIdentifier (padrão) e "sub" (comum em JWTs).
     /// </summary>
     protected Guid GetUserId()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userIdClaim = User.FindFirst("jti")?.Value;
+
         return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
     }
 
